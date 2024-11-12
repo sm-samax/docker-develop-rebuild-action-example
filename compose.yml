@@ -1,0 +1,46 @@
+
+services:
+  mysql:
+    image: mysql:8.4.2
+    restart: always
+    hostname: mysql
+    container_name: mysql
+    environment:
+        MYSQL_RANDOM_ROOT_PASSWORD: true
+        MYSQL_USER: spring
+        MYSQL_DATABASE: spring
+        MYSQL_PASSWORD: password
+    volumes:
+    - mysql_data:/var/lib/mysql
+    networks:
+    - backend
+
+  spring:
+    build: ./spring
+    restart: always
+    hostname: spring
+    container_name: spring
+    environment:
+      DATABASE: spring
+      DATABASE_HOST: mysql
+      DATABASE_USER: spring
+      DATABASE_PASSWORD: password
+    ports:
+      - 80:8080
+    networks:
+      - backend
+    depends_on:
+      - mysql
+    develop:
+      # when source code changes, rebuild triggers
+      watch:
+      - path: ./spring/src
+        action: rebuild
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    
